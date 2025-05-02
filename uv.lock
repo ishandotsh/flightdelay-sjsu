@@ -237,6 +237,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "ipykernel" },
+    { name = "joblib" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pandas" },
@@ -246,6 +247,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "ipykernel", specifier = ">=6.29.5" },
+    { name = "joblib", specifier = ">=1.4.2" },
     { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "numpy", specifier = ">=2.2.5" },
     { name = "pandas", specifier = ">=2.2.3" },
