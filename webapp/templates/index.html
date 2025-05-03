@@ -71,8 +71,8 @@
                     resultDiv.style.color = 'red';
                 } else {
                     resultDiv.innerHTML = `Delay Probability: ${data.delay_probability}%<br>
-                                           Likely to be Delayed: ${data.is_delayed ? 'Yes' : 'No'}`;
-                    resultDiv.style.color = data.is_delayed ? 'red' : 'green';
+                                           Likely to be Delayed: ${data.is_delayed}`;
+                    resultDiv.style.color = data.is_delayed === 'Yes' ? 'red' : 'green';
                 }
             })
             .catch(error => {

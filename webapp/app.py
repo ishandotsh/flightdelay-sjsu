@@ -55,7 +55,7 @@ def predict():
 
         return jsonify({
             'delay_probability': round(delay_prob, 2),
-            'is_delayed': delay_prob > 50
+            'is_delayed': 'Yes' if delay_prob > 50 else 'No'
         })
 
     except Exception as e:
