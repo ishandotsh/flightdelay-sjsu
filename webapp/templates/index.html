@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flight Delay Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        form {
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flight Delay Predictor</h1>
+    <form id="predictionForm">
+        <select name="airline" required>
+            <option value="">Select Airline</option>
+            <option value="American">American Airlines</option>
+            <option value="Delta">Delta</option>
+            <option value="United">United</option>
+        </select>
+        <input type="text" name="airport_from" placeholder="Origin Airport" required>
+        <input type="text" name="airport_to" placeholder="Destination Airport" required>
+        <select name="day_of_week" required>
+            <option value="">Select Day of Week</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+            <option value="7">Sunday</option>
+        </select>
+        <input type="number" name="flight_number" placeholder="Flight Number" required>
+        <input type="number" name="time" placeholder="Time (24-hour format)" required>
+        <input type="number" name="length" placeholder="Flight Length (minutes)" required>
+        <button type="submit">Predict Delay</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch('/predict', {
+                method: 'POST',
+                body: new FormData(e.target)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.error) {
+                    resultDiv.innerHTML = `Error: ${data.error}`;
+                    resultDiv.style.color = 'red';
+                } else {
+                    resultDiv.innerHTML = `Delay Probability: ${data.delay_probability}%<br>
+                                           Likely to be Delayed: ${data.is_delayed ? 'Yes' : 'No'}`;
+                    resultDiv.style.color = data.is_delayed ? 'red' : 'green';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
