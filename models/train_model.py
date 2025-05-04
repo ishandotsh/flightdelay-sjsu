@@ -37,7 +37,8 @@ def main():
         df['Delayed'] = df['Delay']
         
         # Select relevant features
-        features = ['Flight', 'Time', 'Length', 'Airline', 'AirportFrom', 'AirportTo', 'Route', 'DayOfWeek']
+        # features = ['Flight', 'Time', 'Length', 'Airline', 'AirportFrom', 'AirportTo', 'Route', 'DayOfWeek']
+        features = ['Time', 'Length', 'Airline', 'AirportFrom', 'AirportTo', 'Route', 'DayOfWeek']
         
         # Create a new dataframe with selected features and target
         processed_df = df[features + ['Delayed']]
@@ -78,7 +79,8 @@ def main():
 
     # Preprocessing configuration
     cat_cols = ['Airline', 'AirportFrom', 'AirportTo', 'Route', 'DayOfWeek']
-    num_cols = ['Flight', 'Time', 'Length']
+    # num_cols = ['Flight', 'Time', 'Length']
+    num_cols = ['Time', 'Length']
 
     preprocessor = ColumnTransformer([
         ("num", StandardScaler(), num_cols),

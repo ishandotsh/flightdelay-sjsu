@@ -16,9 +16,9 @@ model = joblib.load(MODEL_PATH)
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Preprocessing configuration
 cat_cols = ['Airline', 'AirportFrom', 'AirportTo', 'Route', 'DayOfWeek']
-num_cols = ['Flight', 'Time', 'Length', 'Airline_DelayRate', 'Route_AvgDelay']
+# num_cols = ['Flight', 'Time', 'Length', 'Airline_DelayRate', 'Route_AvgDelay']
+num_cols = ['Time', 'Length', 'Airline_DelayRate', 'Route_AvgDelay']
 
 preprocessor = ColumnTransformer([
     ("num", StandardScaler(), num_cols),
@@ -42,7 +42,7 @@ def predict():
                 'AirportTo': request.form['airport_to'],
                 'Route': f"{request.form['airport_from']}-{request.form['airport_to']}",
                 'DayOfWeek': request.form['day_of_week'],
-                'Flight': float(request.form['flight_number']),
+                # 'Flight': float(request.form['flight_number']),
                 'Time': float(request.form['time']),
                 'Length': float(request.form['length']),
                 'Airline_DelayRate': 0.5,  # Default value, should be calculated dynamically
