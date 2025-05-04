@@ -31,18 +31,9 @@
 <body>
     <h1>Flight Delay Predictor</h1>
     <form id="predictionForm">
-        <!-- <select name="airline" required>
-            <option value="">Select Airline</option>
-            <option value="American">American Airlines</option>
-            <option value="Delta">Delta</option>
-            <option value="United">United</option>
-        </select>
-        <input type="text" name="airport_from" placeholder="Origin Airport" required>
-        <input type="text" name="airport_to" placeholder="Destination Airport" required> -->
         <select id="airline" name="airline" required style="width:100%"></select>
         <select id="airport_from" name="airport_from" required style="width:100%"></select>
         <select id="airport_to" name="airport_to" required style="width:100%"></select>
-    
 
         <select name="day_of_week" required>
             <option value="">Select Day of Week</option>
@@ -54,13 +45,11 @@
             <option value="6">Saturday</option>
             <option value="7">Sunday</option>
         </select>
-        <!-- <input type="number" name="flight_number" placeholder="Flight Number" required> -->
-        <!-- <input type="number" name="time" placeholder="Time (24-hour format)" required> -->
+
         <label>Time of Flight</label>
         <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
             <select id="hour" required>
                 <option value="">Hour</option>
-                <!-- 1-12 -->
                 <script>
                     for (let i = 1; i <= 12; i++) {
                         document.write(`<option value="${i}">${i}</option>`);
@@ -70,7 +59,6 @@
             <span>:</span>
             <select id="minute" required>
                 <option value="">Min</option>
-                <!-- 00-59 -->
                 <script>
                     for (let i = 0; i < 60; i++) {
                         let val = i.toString().padStart(2, '0');
@@ -84,8 +72,7 @@
             </select>
         </div>
         <input type="hidden" name="time" id="time_hidden" required>
-    
-        <!-- <input type="number" name="length" placeholder="Flight Length (minutes)" required> -->
+
         <label>Flight Length</label>
         <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
             <select id="length_hour" required>
@@ -111,110 +98,98 @@
 
         <button type="submit">Predict Delay</button>
     </form>
+
     <div id="result"></div>
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        const airlines = [
-            'CO', 'US', 'AA', 'AS', 'DL', 'B6', 'HA', 'OO', '9E', 'OH', 'EV', 'XE', 'YV', 'UA',
-            'MQ', 'FL', 'F9', 'WN'
-        ].sort();
+        const airlineMap = {
+            'AS': 'Alaska Airlines', 'AA': 'American Airlines', 'AC': 'Air Canada', 'AM': 'Aeromexico',
+            'CO': 'Continental Airlines', 'DL': 'Delta Airlines', 'FX': 'FedEx', 'HA': 'Hawaiian Airlines',
+            'NW': 'Northwest Airlines', 'PO': 'Polar Air Cargo', 'SW': 'Southwest Airlines',
+            'UA': 'United Airlines', '5X': 'United Parcel (UPS)', 'VS': 'Virgin Atlantic',
+            'VB': 'VivaAerobús', 'WS': 'WestJet'
+        };
 
-        const airports = [
-            'IAH', 'CLT', 'DFW', 'SEA', 'MSP', 'DTW', 'ORD', 'ATL', 'PDX', 'JFK', 'SLC', 'HNL',
-            'PHX', 'MCO', 'OGG', 'LAX', 'KOA', 'ITO', 'SFO', 'MIA', 'IAD', 'SMF', 'PHL', 'LIH',
-            'DEN', 'LGA', 'MEM', 'CVG', 'YUM', 'CWA', 'MKE', 'BQN', 'FAI', 'LAS', 'ANC', 'BOS',
-            'LGB', 'FLL', 'SJU', 'EWR', 'DCA', 'BWI', 'RDU', 'MCI', 'TYS', 'SAN', 'ONT', 'OAK',
-            'MDW', 'BNA', 'DAL', 'CLE', 'JAX', 'JNU', 'RNO', 'ELP', 'SAT', 'OTZ', 'MBS', 'BDL',
-            'STL', 'HOU', 'AUS', 'SNA', 'SJC', 'LIT', 'TUS', 'TUL', 'CMH', 'LAN', 'IND', 'AMA',
-            'CRP', 'PIT', 'RKS', 'FWA', 'TPA', 'PBI', 'JAN', 'DSM', 'ADQ', 'GRB', 'PVD', 'ABQ',
-            'SDF', 'RSW', 'MSY', 'BUR', 'BOI', 'TLH', 'BHM', 'ACV', 'ORF', 'BET', 'KTN', 'RIC',
-            'SRQ', 'BTR', 'XNA', 'MHT', 'GRR', 'SBN', 'SBA', 'ROA', 'CID', 'GPT', 'MFR', 'SGU',
-            'HPN', 'OMA', 'OTH', 'GSP', 'LMT', 'BUF', 'MSN', 'BFL', 'CAE', 'HRL', 'OKC', 'SYR',
-            'COS', 'BTV', 'CDC', 'SCC', 'DAY', 'SJT', 'TVC', 'ROC', 'ISP', 'MRY', 'SBP', 'MLI',
-            'MOB', 'CIC', 'SAV', 'FAT', 'EKO', 'GEG', 'ECP', 'LFT', 'SUN', 'HSV', 'SHV', 'CHA',
-            'CAK', 'BZN', 'MAF', 'GSO', 'MDT', 'PHF', 'ICT', 'AZO', 'RAP', 'CHS', 'CLD', 'MKG',
-            'VPS', 'PIH', 'ATW', 'AGS', 'PNS', 'BIL', 'SPI', 'FAR', 'CPR', 'PIA', 'SPS', 'TWF',
-            'LBB', 'ALB', 'CEC', 'DRO', 'GJT', 'GNV', 'RST', 'AVL', 'GRK', 'PSP', 'LEX', 'TRI',
-            'SGF', 'FSM', 'RDD', 'OME', 'MFE', 'LSE', 'BMI', 'MYR', 'FAY', 'FSD', 'EUG', 'MGM',
-            'EVV', 'MLB', 'FNT', 'STT', 'WRG', 'ABE', 'BIS', 'MOT', 'MLU', 'GFK', 'RDM', 'COU',
-            'LRD', 'PSC', 'MOD', 'PWM', 'ILM', 'ABY', 'CRW', 'TXK', 'BRO', 'BRW', 'EYW', 'DAB',
-            'ROW', 'ABI', 'EAU', 'TYR', 'MSO', 'FLG', 'CSG', 'VLD', 'DHN', 'OAJ', 'AEX', 'CHO',
-            'SAF', 'GGG', 'FCA', 'ASE', 'BKG', 'MHK', 'LNK', 'MQT', 'YAK', 'GTR', 'SMX', 'SWF',
-            'ITH', 'AVP', 'ELM', 'BGM', 'SIT', 'PSG', 'CYS', 'CLL', 'SCE', 'LWB', 'LCH', 'GCC',
-            'IYK', 'LWS', 'COD', 'HLN', 'BQK', 'GTF', 'DLH', 'BTM', 'EGE', 'IDA', 'JAC', 'HDN',
-            'MTJ', 'CMX', 'CMI', 'CDV', 'LYH', 'ACT', 'STX', 'IPL', 'PAH', 'HTS', 'MEI', 'BLI',
-            'ERI', 'EWN', 'FLO', 'ACY', 'DBQ', 'TOL', 'GUC', 'PLN', 'BGR', 'PSE', 'PIE', 'UTM',
-            'ADK', 'ABR', 'TEX', 'MMH', 'GUM'
-        ].sort();
+        const airportMap = {
+            'ATL': 'Hartsfield-Jackson Atlanta Intl', 'AUS': 'Austin-Bergstrom Intl', 'BNA': 'Nashville Intl',
+            'BOS': 'Boston Logan Intl', 'BWI': 'Baltimore-Washington Intl', 'CLT': 'Charlotte Douglas Intl',
+            'DAL': 'Dallas Love Field', 'DCA': 'Reagan National', 'DEN': 'Denver Intl', 'DFW': 'Dallas/Fort Worth',
+            'DTW': 'Detroit Metro', 'EWR': 'Newark Liberty Intl', 'FLL': 'Fort Lauderdale Intl', 'HNL': 'Honolulu Intl',
+            'HOU': 'Hobby Airport', 'IAD': 'Dulles Intl', 'IAH': 'Bush Intercontinental', 'JFK': 'JFK Intl',
+            'LAS': 'McCarran Intl', 'LAX': 'Los Angeles Intl', 'LGA': 'LaGuardia', 'MCO': 'Orlando Intl',
+            'MDW': 'Chicago Midway', 'MIA': 'Miami Intl', 'MSP': 'Minneapolis Intl', 'MSY': 'New Orleans Intl',
+            'OAK': 'Oakland Intl', 'ORD': "O'Hare Intl", 'PDX': 'Portland Intl', 'PHL': 'Philadelphia Intl',
+            'PHX': 'Phoenix Sky Harbor', 'RDU': 'Raleigh-Durham Intl', 'SAN': 'San Diego Intl',
+            'SEA': 'Seattle-Tacoma Intl', 'SFO': 'San Francisco Intl', 'SJC': 'San Jose Intl',
+            'SLC': 'Salt Lake City Intl', 'SMF': 'Sacramento Intl', 'STL': 'St. Louis Lambert', 'TPA': 'Tampa Intl'
+        };
 
-        function populateSelect(id, options, placeholder) {
+        function populateSelect(id, mapData, placeholder) {
             const select = document.getElementById(id);
-            select.innerHTML = `<option value="">${placeholder}</option>` +
-                options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+            select.innerHTML = `<option value="">${placeholder}</option>`;
+            Object.entries(mapData).forEach(([code, name]) => {
+                select.innerHTML += `<option value="${code}">${name} (${code})</option>`;
+            });
         }
 
-        populateSelect('airline', airlines, 'Select Airline');
-        populateSelect('airport_from', airports, 'Select Origin Airport');
-        populateSelect('airport_to', airports, 'Select Destination Airport');
+        populateSelect('airline', airlineMap, 'Select Airline');
+        populateSelect('airport_from', airportMap, 'Select Origin Airport');
+        populateSelect('airport_to', airportMap, 'Select Destination Airport');
 
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', () => {
             $('#airline').select2({ placeholder: 'Select Airline', allowClear: true });
             $('#airport_from').select2({ placeholder: 'Select Origin Airport', allowClear: true });
             $('#airport_to').select2({ placeholder: 'Select Destination Airport', allowClear: true });
-        });
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <script>
-        document.getElementById('predictionForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const hour = parseInt(document.getElementById('hour').value, 10);
-            const minute = parseInt(document.getElementById('minute').value, 10);
-            const ampm = document.getElementById('ampm').value;
-            if (isNaN(hour) || isNaN(minute) || !ampm) {
+            document.getElementById('predictionForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                alert('Please select a valid time.');
-                return;
-            }
 
-            let hour24 = hour % 12;
-            if (ampm === 'PM') hour24 += 12;
-            const minutesFromMidnight = hour24 * 60 + minute;
-
-            document.getElementById('time_hidden').value = minutesFromMidnight;
-
-            const lengthHour = parseInt(document.getElementById('length_hour').value, 10);
-            const lengthMinute = parseInt(document.getElementById('length_minute').value, 10);
-            if (isNaN(lengthHour) || isNaN(lengthMinute)) {
-                alert('Please select a valid flight length.');
-                return;
-            }
-            const totalLengthMinutes = lengthHour * 60 + lengthMinute;
-            document.getElementById('length_hidden').value = totalLengthMinutes;
-
-            fetch('/predict', {
-                method: 'POST',
-                body: new FormData(e.target)
-            })
-            .then(response => response.json())
-            .then(data => {
-                const resultDiv = document.getElementById('result');
-                if (data.error) {
-                    resultDiv.innerHTML = `Error: ${data.error}`;
-                    resultDiv.style.color = 'red';
-                } else {
-                    resultDiv.innerHTML = `Delay Probability: ${data.delay_probability}%<br>
-                                           Likely to be Delayed: ${data.is_delayed}`;
-                    resultDiv.style.color = data.is_delayed === 'Yes' ? 'red' : 'green';
+                const hour = parseInt(document.getElementById('hour').value, 10);
+                const minute = parseInt(document.getElementById('minute').value, 10);
+                const ampm = document.getElementById('ampm').value;
+                if (isNaN(hour) || isNaN(minute) || !ampm) {
+                    alert('Please select a valid time.');
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                let hour24 = hour % 12;
+                if (ampm === 'PM') hour24 += 12;
+                const minutesFromMidnight = hour24 * 60 + minute;
+                document.getElementById('time_hidden').value = minutesFromMidnight;
+
+                const lengthHour = parseInt(document.getElementById('length_hour').value, 10);
+                const lengthMinute = parseInt(document.getElementById('length_minute').value, 10);
+                if (isNaN(lengthHour) || isNaN(lengthMinute)) {
+                    alert('Please select a valid flight length.');
+                    return;
+                }
+                const totalLength = lengthHour * 60 + lengthMinute;
+                document.getElementById('length_hidden').value = totalLength;
+
+                fetch('/predict', {
+                    method: 'POST',
+                    body: new FormData(e.target)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const resultDiv = document.getElementById('result');
+                    if (data.error) {
+                        resultDiv.innerHTML = `Error: ${data.error}`;
+                        resultDiv.style.color = 'red';
+                    } else {
+                        resultDiv.innerHTML = `
+                            <p><strong>Delay Probability:</strong> ${data.delay_probability}%</p>
+                            <p><strong>Likely to be Delayed:</strong> ${data.is_delayed}</p>
+                            <p><strong>Risk Category:</strong> ${data.risk_category}</p>`;
+                        resultDiv.style.color = data.is_delayed === 'Yes' ? 'red' : 'green';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    document.getElementById('result').innerHTML = 'Prediction failed.';
+                });
             });
         });
     </script>
-
 </body>
 </html>
