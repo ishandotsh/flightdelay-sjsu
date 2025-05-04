@@ -10,8 +10,16 @@ from category_encoders import BinaryEncoder
 from sklearn.compose import ColumnTransformer
 
 # Load the pre-trained model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'random_forest_model')
+# MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'random_forest_model')
+# model = joblib.load(MODEL_PATH)
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'rf_production_model.joblib')
+PREPROCESSOR_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'rf_preprocessor.joblib')
 model = joblib.load(MODEL_PATH)
+preprocessor = joblib.load(PREPROCESSOR_PATH)
+
+df_airline_delay_rate = pd.read_csv(os.path.join(os.path.dirname(__file__), 'precalc_metrics', 'airline_delay_rate.csv'), index_col=None)
+df_route_airline_delay_rate = pd.read_csv(os.path.join(os.path.dirname(__file__), 'precalc_metrics', 'route_airline_delay_rate.csv'), index_col=None)
+df_route_delay_rate = pd.read_csv(os.path.join(os.path.dirname(__file__), 'precalc_metrics', 'route_delay_rate.csv'), index_col=None)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -20,10 +28,10 @@ cat_cols = ['Airline', 'AirportFrom', 'AirportTo', 'Route', 'DayOfWeek']
 # num_cols = ['Flight', 'Time', 'Length', 'Airline_DelayRate', 'Route_AvgDelay']
 num_cols = ['Time', 'Length', 'Airline_DelayRate', 'Route_AvgDelay']
 
-preprocessor = ColumnTransformer([
-    ("num", StandardScaler(), num_cols),
-    ("cat", BinaryEncoder(), cat_cols)
-])
+# preprocessor = ColumnTransformer([
+#     ("num", StandardScaler(), num_cols),
+#     ("cat", BinaryEncoder(), cat_cols)
+# ])
 
 @app.route('/')
 def index():
@@ -45,16 +53,32 @@ def predict():
                 # 'Flight': float(request.form['flight_number']),
                 'Time': float(request.form['time']),
                 'Length': float(request.form['length']),
-                'Airline_DelayRate': 0.5,  # Default value, should be calculated dynamically
-                'Route_AvgDelay': 0.5  # Default value, should be calculated dynamically
+                'Airline_DelayRate': 0.0,  
+                'Route_AvgDelay': 0.0  
             }
+        
+        # input_data['Airline_DelayRate'] = float(df_airline_delay_rate[df_airline_delay_rate['Airline'] == input_data['Airline']]['delay_rate'])
+        # print("--------------------")
+        match = df_airline_delay_rate.loc[df_airline_delay_rate['Airline'] == input_data['Airline'], 'delay_rate']
+        input_data['Airline_DelayRate'] = float(match.squeeze()) if not match.empty else 0.0
+        # print(input_data['Airline_DelayRate'])
 
+        match_route = df_route_delay_rate.loc[
+            (df_route_delay_rate['AirportFrom'] == input_data['AirportFrom']) & 
+            (df_route_delay_rate['AirportTo'] == input_data['AirportTo']),
+            'delay_rate'
+        ]
+        input_data['Route_AvgDelay'] = float(match_route.squeeze()) if not match_route.empty else 0.0
+        # print(input_data['Route_AvgDelay'])
+        # print("--------------------")
+        
         # Convert to DataFrame
         df = pd.DataFrame([input_data])
+        X_processed = preprocessor.transform(df)
 
         # Predict probabilities
         # Get probabilistic predictions
-        prediction = model.predict_proba(df)
+        prediction = model.predict_proba(X_processed)
         delay_prob = round(prediction[0][1] * 100, 2)
         no_delay_prob = round(prediction[0][0] * 100, 2)
         

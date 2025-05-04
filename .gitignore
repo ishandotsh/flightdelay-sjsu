@@ -45,3 +45,4 @@ Thumbs.db
 lightning_logs
 saved_models/
 random_forest_model
+*.joblib
