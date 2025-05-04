@@ -1,7 +1,8 @@
 flask==2.3.2
-scikit-learn==1.2.2
-pandas==2.0.1
-numpy==1.24.3
-joblib==1.2.0
-category_encoders==2.6.0
+numpy>=2.0.1          # gives the new numpy._core namespace
+scikit-learn==1.6.1   # matches the objects in the pickle
+pandas>=2.0.3         # 2.x series works fine with numpy 2.x
+category_encoders>=2.8.1  # latest release adds sklearn‑1.6 tag support :contentReference[oaicite:2]{index=2}
+joblib==1.3.0         # optional but pairs with sklearn 1.6
 gunicorn==20.1.0
+flask-cors

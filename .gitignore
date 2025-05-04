@@ -39,3 +39,8 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+
+.lr*
+.pt_tmp
+lightning_logs
+saved_models/
