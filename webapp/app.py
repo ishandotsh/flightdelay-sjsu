@@ -32,16 +32,17 @@ def index():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get input data from the form
+        # Get input data from JSON
+        data = request.get_json()
         input_data = {
-            'Airline': request.form['airline'],
-            'AirportFrom': request.form['airport_from'],
-            'AirportTo': request.form['airport_to'],
-            'Route': f"{request.form['airport_from']}-{request.form['airport_to']}",
-            'DayOfWeek': request.form['day_of_week'],
-            'Flight': float(request.form['flight_number']),
-            'Time': float(request.form['time']),
-            'Length': float(request.form['length']),
+            'Airline': data['Airline'],
+            'AirportFrom': data['AirportFrom'],
+            'AirportTo': data['AirportTo'],
+            'Route': f"{data['AirportFrom']}-{data['AirportTo']}",
+            'DayOfWeek': int(data['DayOfWeek']),
+            'Flight': float(data['FlightNumber']),
+            'Time': float(data['Time']),
+            'Length': float(data['Length']),
             'Airline_DelayRate': 0.5,  # Default value, should be calculated dynamically
             'Route_AvgDelay': 0.5  # Default value, should be calculated dynamically
         }

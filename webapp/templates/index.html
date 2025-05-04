@@ -3,80 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <title>Flight Delay Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
+        /* Remove all bottom-right floating elements */
+        [data-windsurf-element], [data-cascade-element], .cascade-help-button,
+        #windsurf-help-button, #cascade-help-button,
+        .windsurf-floating-button, .cascade-floating-button,
+        [class*='bottom-right'], [id*='bottom-right'] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            position: absolute;
+            top: -9999px !important;
+            left: -9999px !important;
         }
-        form {
-            background: #f4f4f4;
+        
+        /* Ensure no remnant elements remain */
+        body {
+            overflow: hidden;
+        }
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            border-radius: 8px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            transition: box-shadow 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .container:hover {
+            box-shadow: 0 20px 45px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+        .form-row {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
         }
         input, select {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
         }
-        #result {
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(50,50,93,0.1), 0 3px 6px rgba(0,0,0,0.08);
+        }
+        #resultDiv {
             margin-top: 20px;
-            font-weight: bold;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        #resultDiv.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .risk-indicator {
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to right, #2ecc71, #f1c40f, #e74c3c);
+            border-radius: 5px;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <h1>Flight Delay Predictor</h1>
-    <form id="predictionForm">
-        <select name="airline" required>
-            <option value="">Select Airline</option>
-            <option value="American">American Airlines</option>
-            <option value="Delta">Delta</option>
-            <option value="United">United</option>
-        </select>
-        <input type="text" name="airport_from" placeholder="Origin Airport" required>
-        <input type="text" name="airport_to" placeholder="Destination Airport" required>
-        <select name="day_of_week" required>
-            <option value="">Select Day of Week</option>
-            <option value="1">Monday</option>
-            <option value="2">Tuesday</option>
-            <option value="3">Wednesday</option>
-            <option value="4">Thursday</option>
-            <option value="5">Friday</option>
-            <option value="6">Saturday</option>
-            <option value="7">Sunday</option>
-        </select>
-        <input type="number" name="flight_number" placeholder="Flight Number" required>
-        <input type="number" name="time" placeholder="Time (24-hour format)" required>
-        <input type="number" name="length" placeholder="Flight Length (minutes)" required>
-        <button type="submit">Predict Delay</button>
-    </form>
-    <div id="result"></div>
+    <div class="container">
+        <h1>Flight Delay Predictor</h1>
+        <form id="predictionForm">
+            <div class="form-row">
+                <label for="airline">Airline</label>
+                <select id="airline" name="Airline" required>
+                    <option value="">Choose Airline</option>
+                    <option value="American">American Airlines</option>
+                    <option value="Delta">Delta Airlines</option>
+                    <option value="United">United Airlines</option>
+                    <option value="Southwest">Southwest Airlines</option>
+                    <option value="JetBlue">JetBlue Airways</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="airportFrom">Origin Airport</label>
+                <select id="airportFrom" name="AirportFrom" required>
+                    <option value="">Choose Origin Airport</option>
+                    <option value="SFO">San Francisco (SFO)</option>
+                    <option value="LAX">Los Angeles (LAX)</option>
+                    <option value="JFK">New York JFK (JFK)</option>
+                    <option value="ORD">Chicago O'Hare (ORD)</option>
+                    <option value="ATL">Atlanta (ATL)</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="airportTo">Destination Airport</label>
+                <select id="airportTo" name="AirportTo" required>
+                    <option value="">Choose Destination Airport</option>
+                    <option value="SFO">San Francisco (SFO)</option>
+                    <option value="LAX">Los Angeles (LAX)</option>
+                    <option value="JFK">New York JFK (JFK)</option>
+                    <option value="ORD">Chicago O'Hare (ORD)</option>
+                    <option value="ATL">Atlanta (ATL)</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="flightNumber">Flight Number</label>
+                <input type="text" id="flightNumber" name="FlightNumber" placeholder="Enter Flight Number" required>
+            </div>
+
+            <div class="form-row">
+                <label for="dayOfWeek">Day of Week</label>
+                <select id="dayOfWeek" name="DayOfWeek" required>
+                    <option value="">Choose Day</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="7">Sunday</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="time">Flight Time</label>
+                <input type="number" id="time" name="Time" placeholder="Enter Time (24-hour format)" min="0" max="2359" required>
+            </div>
+
+            <div class="form-row">
+                <label for="length">Flight Length (minutes)</label>
+                <input type="number" id="length" name="Length" placeholder="Enter Flight Length" required>
+            </div>
+
+            <button type="submit">Predict Delay</button>
+        </form>
+        <div id="resultDiv"></div>
+        <div class="risk-indicator"></div>
+    </div>
 
     <script>
         document.getElementById('predictionForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            const formData = new FormData(e.target);
             
+            const dayOfWeekMap = {
+                '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7
+            };
+            
+            const data = {
+                Airline: formData.get('Airline'),
+                AirportFrom: formData.get('AirportFrom'),
+                AirportTo: formData.get('AirportTo'),
+                FlightNumber: formData.get('FlightNumber'),
+                DayOfWeek: dayOfWeekMap[formData.get('DayOfWeek')],
+                Time: parseInt(formData.get('Time')),
+                Length: parseInt(formData.get('Length'))
+            };
+
             fetch('/predict', {
                 method: 'POST',
-                body: new FormData(e.target)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             })
-            .then(response => response.json())
-            .then(data => {
-                const resultDiv = document.getElementById('result');
-                if (data.error) {
-                    resultDiv.innerHTML = `Error: ${data.error}`;
-                    resultDiv.style.color = 'red';
-                } else {
-                    resultDiv.innerHTML = `Delay Probability: ${data.delay_probability}%<br>
-                                           Likely to be Delayed: ${data.is_delayed}`;
-                    resultDiv.style.color = data.is_delayed === 'Yes' ? 'red' : 'green';
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                return response.json();
             })
-            .catch(error => {
-                console.error('Error:', error);
+            .then(data => {
+                const resultDiv = document.getElementById('resultDiv');
+                const riskIndicator = document.querySelector('.risk-indicator');
+                const delayProbability = data.delay_probability || 0;
+
+                resultDiv.innerHTML = `
+                    <p>Delay Probability: ${delayProbability}%</p>
+                    <p>Likely to be Delayed: ${data.is_delayed || 'Unknown'}</p>
+                `;
+                resultDiv.style.color = data.is_delayed === 'Yes' ? '#e74c3c' : '#2ecc71';
+                
+                // Animate result
+                resultDiv.classList.add('show');
+                
+                // Update risk indicator
+                riskIndicator.style.background = `linear-gradient(to right, #2ecc71 0%, #f1c40f ${delayProbability}%, #e74c3c 100%)`;
+            })
+            .catch((error) => {
+                const resultDiv = document.getElementById('resultDiv');
+                resultDiv.innerHTML = 'Prediction failed. Please check your inputs.';
+                resultDiv.style.color = '#e74c3c';
+                resultDiv.classList.add('show');
             });
         });
     </script>
