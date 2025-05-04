@@ -10,7 +10,7 @@ from category_encoders import BinaryEncoder
 from sklearn.compose import ColumnTransformer
 
 # Load the pre-trained model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'log_reg_acc_6549')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'random_forest_model')
 model = joblib.load(MODEL_PATH)
 
 app = Flask(__name__)
@@ -32,30 +32,50 @@ def index():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get input data from the form
-        input_data = {
-            'Airline': request.form['airline'],
-            'AirportFrom': request.form['airport_from'],
-            'AirportTo': request.form['airport_to'],
-            'Route': f"{request.form['airport_from']}-{request.form['airport_to']}",
-            'DayOfWeek': request.form['day_of_week'],
-            'Flight': float(request.form['flight_number']),
-            'Time': float(request.form['time']),
-            'Length': float(request.form['length']),
-            'Airline_DelayRate': 0.5,  # Default value, should be calculated dynamically
-            'Route_AvgDelay': 0.5  # Default value, should be calculated dynamically
-        }
+        # Get input data from JSON or form
+        if request.is_json:
+            input_data = request.get_json()
+        else:
+            input_data = {
+                'Airline': request.form['airline'],
+                'AirportFrom': request.form['airport_from'],
+                'AirportTo': request.form['airport_to'],
+                'Route': f"{request.form['airport_from']}-{request.form['airport_to']}",
+                'DayOfWeek': request.form['day_of_week'],
+                'Flight': float(request.form['flight_number']),
+                'Time': float(request.form['time']),
+                'Length': float(request.form['length']),
+                'Airline_DelayRate': 0.5,  # Default value, should be calculated dynamically
+                'Route_AvgDelay': 0.5  # Default value, should be calculated dynamically
+            }
 
         # Convert to DataFrame
         df = pd.DataFrame([input_data])
 
-        # Predict
-        prediction = model.predict_proba(df)[0]
-        delay_prob = prediction[1] * 100  # Probability of delay
+        # Predict probabilities
+        # Get probabilistic predictions
+        prediction = model.predict_proba(df)
+        delay_prob = round(prediction[0][1] * 100, 2)
+        no_delay_prob = round(prediction[0][0] * 100, 2)
+        
+        # Determine risk category
+        if delay_prob <= 25:
+            risk_category = 'Low Risk'
+        elif delay_prob <= 50:
+            risk_category = 'Moderate Risk'
+        elif delay_prob <= 75:
+            risk_category = 'High Risk'
+        else:
+            risk_category = 'Very High Risk'
 
         return jsonify({
-            'delay_probability': round(delay_prob, 2),
-            'is_delayed': 'Yes' if delay_prob > 50 else 'No'
+            'delay_probability': delay_prob,
+            'risk_category': risk_category,
+            'is_delayed': 'Yes' if delay_prob > 50 else 'No',
+            'detailed_prediction': {
+                'no_delay_prob': no_delay_prob,
+                'delay_prob': delay_prob
+            }
         })
 
     except Exception as e:
