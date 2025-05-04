@@ -44,3 +44,4 @@ Thumbs.db
 .pt_tmp
 lightning_logs
 saved_models/
+random_forest_model
