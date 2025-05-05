@@ -172,6 +172,33 @@
     populateSelect('airport_from', airportMap, 'Select Origin Airport');
     populateSelect('airport_to', airportMap, 'Select Destination Airport');
 
+    function populateSelect(id, mapData, placeholder) {
+      const select = document.getElementById(id);
+      select.innerHTML = `<option value="">${placeholder}</option>`;
+      Object.entries(mapData).forEach(([code, name]) => {
+        select.innerHTML += `<option value="${code}">${name} (${code})</option>`;
+      });
+    }
+
+    populateSelect('airline', airlineMap, 'Select Airline');
+    populateSelect('airport_from', airportMap, 'Select Origin Airport');
+    populateSelect('airport_to', airportMap, 'Select Destination Airport');
+
+    $(document).ready(function () {
+      $('#airline').select2();
+      $('#airport_from').select2();
+      $('#airport_to').select2();
+
+      $('#predictionForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const hour = parseInt($('#hour').val());
+        const minute = parseInt($('#minute').val());
+        const ampm = $('#ampm').val();
+        if (isNaN(hour) || isNaN(minute) || !ampm) return alert("Invalid time");
+        let hour24 = hour % 12;
+        if (ampm === "PM") hour24 += 12;
+        $('#time_hidden').val(hour24 * 60 + minute);
     $(document).ready(function () {
       $('#airline').select2();
       $('#airport_from').select2();
@@ -188,6 +215,10 @@
         if (ampm === "PM") hour24 += 12;
         $('#time_hidden').val(hour24 * 60 + minute);
 
+        const lengthHour = parseInt($('#length_hour').val());
+        const lengthMinute = parseInt($('#length_minute').val());
+        if (isNaN(lengthHour) || isNaN(lengthMinute)) return alert("Invalid flight length");
+        $('#length_hidden').val(lengthHour * 60 + lengthMinute);
         const lengthHour = parseInt($('#length_hour').val());
         const lengthMinute = parseInt($('#length_minute').val());
         if (isNaN(lengthHour) || isNaN(lengthMinute)) return alert("Invalid flight length");
