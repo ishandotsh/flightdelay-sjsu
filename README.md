@@ -6,7 +6,7 @@
 # Install uv, on macOS and Linux.
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# install dependencies (part 1)
+# install dependencies
 uv sync
 
 # train model
