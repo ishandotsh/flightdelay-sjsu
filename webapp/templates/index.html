@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <title>Flight Delay Predictor</title>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             text-align: center;
@@ -30,89 +31,100 @@
 </head>
 <body>
     <h1>Flight Delay Predictor</h1>
-    <form id="predictionForm">
-        <!-- <select name="airline" required>
-            <option value="">Select Airline</option>
-            <option value="American">American Airlines</option>
-            <option value="Delta">Delta</option>
-            <option value="United">United</option>
-        </select>
-        <input type="text" name="airport_from" placeholder="Origin Airport" required>
-        <input type="text" name="airport_to" placeholder="Destination Airport" required> -->
-        <select id="airline" name="airline" required style="width:100%"></select>
-        <select id="airport_from" name="airport_from" required style="width:100%"></select>
-        <select id="airport_to" name="airport_to" required style="width:100%"></select>
-    
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 40px;">
+        <div style="flex: 1;">
+            <form id="predictionForm">
+                <!-- <select name="airline" required>
+                    <option value="">Select Airline</option>
+                    <option value="American">American Airlines</option>
+                    <option value="Delta">Delta</option>
+                    <option value="United">United</option>
+                </select>
+                <input type="text" name="airport_from" placeholder="Origin Airport" required>
+                <input type="text" name="airport_to" placeholder="Destination Airport" required> -->
+                <select id="airline" name="airline" required style="width:100%"></select>
+                <select id="airport_from" name="airport_from" required style="width:100%"></select>
+                <select id="airport_to" name="airport_to" required style="width:100%"></select>
+            
 
-        <select name="day_of_week" required>
-            <option value="">Select Day of Week</option>
-            <option value="1">Monday</option>
-            <option value="2">Tuesday</option>
-            <option value="3">Wednesday</option>
-            <option value="4">Thursday</option>
-            <option value="5">Friday</option>
-            <option value="6">Saturday</option>
-            <option value="7">Sunday</option>
-        </select>
-        <!-- <input type="number" name="flight_number" placeholder="Flight Number" required> -->
-        <!-- <input type="number" name="time" placeholder="Time (24-hour format)" required> -->
-        <label>Time of Flight</label>
-        <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
-            <select id="hour" required>
-                <option value="">Hour</option>
-                <!-- 1-12 -->
-                <script>
-                    for (let i = 1; i <= 12; i++) {
-                        document.write(`<option value="${i}">${i}</option>`);
-                    }
-                </script>
-            </select>
-            <span>:</span>
-            <select id="minute" required>
-                <option value="">Min</option>
-                <!-- 00-59 -->
-                <script>
-                    for (let i = 0; i < 60; i++) {
-                        let val = i.toString().padStart(2, '0');
-                        document.write(`<option value="${val}">${val}</option>`);
-                    }
-                </script>
-            </select>
-            <select id="ampm" required>
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-            </select>
-        </div>
-        <input type="hidden" name="time" id="time_hidden" required>
-    
-        <!-- <input type="number" name="length" placeholder="Flight Length (minutes)" required> -->
-        <label>Flight Length</label>
-        <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
-            <select id="length_hour" required>
-                <option value="">Hours</option>
-                <script>
-                    for (let i = 0; i <= 23; i++) {
-                        document.write(`<option value="${i}">${i}</option>`);
-                    }
-                </script>
-            </select>
-            <span>:</span>
-            <select id="length_minute" required>
-                <option value="">Min</option>
-                <script>
-                    for (let i = 0; i < 60; i++) {
-                        let val = i.toString().padStart(2, '0');
-                        document.write(`<option value="${val}">${val}</option>`);
-                    }
-                </script>
-            </select>
-        </div>
-        <input type="hidden" name="length" id="length_hidden" required>
+                <select name="day_of_week" required>
+                    <option value="">Select Day of Week</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="7">Sunday</option>
+                </select>
+                <!-- <input type="number" name="flight_number" placeholder="Flight Number" required> -->
+                <!-- <input type="number" name="time" placeholder="Time (24-hour format)" required> -->
+                <label>Time of Flight</label>
+                <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+                    <select id="hour" required>
+                        <option value="">Hour</option>
+                        <!-- 1-12 -->
+                        <script>
+                            for (let i = 1; i <= 12; i++) {
+                                document.write(`<option value="${i}">${i}</option>`);
+                            }
+                        </script>
+                    </select>
+                    <span>:</span>
+                    <select id="minute" required>
+                        <option value="">Min</option>
+                        <!-- 00-59 -->
+                        <script>
+                            for (let i = 0; i < 60; i++) {
+                                let val = i.toString().padStart(2, '0');
+                                document.write(`<option value="${val}">${val}</option>`);
+                            }
+                        </script>
+                    </select>
+                    <select id="ampm" required>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                </div>
+                <input type="hidden" name="time" id="time_hidden" required>
+            
+                <!-- <input type="number" name="length" placeholder="Flight Length (minutes)" required> -->
+                <label>Flight Length</label>
+                <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+                    <select id="length_hour" required>
+                        <option value="">Hours</option>
+                        <script>
+                            for (let i = 0; i <= 23; i++) {
+                                document.write(`<option value="${i}">${i}</option>`);
+                            }
+                        </script>
+                    </select>
+                    <span>:</span>
+                    <select id="length_minute" required>
+                        <option value="">Min</option>
+                        <script>
+                            for (let i = 0; i < 60; i++) {
+                                let val = i.toString().padStart(2, '0');
+                                document.write(`<option value="${val}">${val}</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+                <input type="hidden" name="length" id="length_hidden" required>
 
-        <button type="submit">Predict Delay</button>
-    </form>
-    <div id="result"></div>
-    
+                <button type="submit">Predict Delay</button>
+            </form>
+            <div id="result"></div>
+        </div>
+        <div style="flex: 1; min-width: 300px;">
+            <h3>Delay Rate by Airline (for selected route)</h3>
+            <canvas id="histogram" width="350" height="350"></canvas>
+        </div>
+        <div style="flex: 1; min-width: 300px;">
+            <h3>Most Delayed Routes for Selected Airline</h3>
+            <canvas id="routeHistogram" width="350" height="350"></canvas>
+        </div>
+    </div>
     <script>
         const airlines = [
             'CO', 'US', 'AA', 'AS', 'DL', 'B6', 'HA', 'OO', '9E', 'OH', 'EV', 'XE', 'YV', 'UA',
@@ -205,9 +217,18 @@
                     resultDiv.innerHTML = `Error: ${data.error}`;
                     resultDiv.style.color = 'red';
                 } else {
+                    let routeMetric = '';
+                    if (data.route_airline_delay_rate !== null && data.route_airline_delay_rate !== undefined) {
+                        routeMetric = `<br>Historical Delay Rate for this Airline & Route: <b>${(data.route_airline_delay_rate * 100).toFixed(2)}%</b>`;
+                    } else {
+                        routeMetric = `<br>Historical Delay Rate for this Airline & Route: <i>Not available</i>`;
+                    }
                     resultDiv.innerHTML = `Delay Probability: ${data.delay_probability}%<br>
-                                           Likely to be Delayed: ${data.is_delayed}`;
+                                           Likely to be Delayed: ${data.is_delayed}` + routeMetric;
                     resultDiv.style.color = data.is_delayed === 'Yes' ? 'red' : 'green';
+                    updateHistogram(data.histogram_data || [], document.getElementById('airline').value);
+                    updateRouteHistogram(data.route_histogram_data || []);
+
                 }
             })
             .catch(error => {
@@ -215,6 +236,95 @@
             });
         });
     </script>
+    <script>
+        let histogramChart = null;
+        let routeHistogramChart = null;
 
+        function updateHistogram(data, userAirline) {
+            console.log('Histogram data:', data);
+            const ctx = document.getElementById('histogram').getContext('2d');
+            const labels = data.map(item => item.airline);
+            const values = data.map(item => item.delay_rate * 100); 
+
+            const backgroundColors = data.map(item =>
+                item.airline === userAirline ? 'rgba(255, 99, 132, 0.7)' : 'rgba(54, 162, 235, 0.7)'
+            );
+
+            if (histogramChart) {
+                histogramChart.data.labels = labels;
+                histogramChart.data.datasets[0].data = values;
+                histogramChart.data.datasets[0].backgroundColor = backgroundColors;
+                histogramChart.update();
+            } else {
+                histogramChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Delay Rate (%)',
+                            data: values,
+                            backgroundColor: backgroundColors,
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: { display: true, text: 'Delay Rate (%)' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        function updateRouteHistogram(data) {
+            const ctx = document.getElementById('routeHistogram').getContext('2d');
+            const labels = data.map(item => item.route);
+            const values = data.map(item => item.delay_rate * 100);
+
+            if (routeHistogramChart) {
+                routeHistogramChart.data.labels = labels;
+                routeHistogramChart.data.datasets[0].data = values;
+                routeHistogramChart.update();
+            } else {
+                routeHistogramChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Delay Rate (%)',
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: { display: true, text: 'Delay Rate (%)' }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        updateHistogram([], null);
+        updateRouteHistogram([]);
+    </script>
 </body>
 </html>

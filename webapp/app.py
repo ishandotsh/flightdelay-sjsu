@@ -92,6 +92,46 @@ def predict():
         else:
             risk_category = 'Very High Risk'
 
+        # -----percentage of flights that are delayed on {airline} with route {from} to {to}
+        match_route_airline = df_route_airline_delay_rate.loc[
+            (df_route_airline_delay_rate['Airline'] == input_data['Airline']) &
+            (df_route_airline_delay_rate['AirportFrom'] == input_data['AirportFrom']) &
+            (df_route_airline_delay_rate['AirportTo'] == input_data['AirportTo']),
+            'delay_rate'
+        ]
+        route_airline_delay_rate = float(match_route_airline.squeeze()) if not match_route_airline.empty else None
+
+        # delay rate of route according to airline + user selection
+        route_mask = (
+            (df_route_airline_delay_rate['AirportFrom'] == input_data['AirportFrom']) &
+            (df_route_airline_delay_rate['AirportTo'] == input_data['AirportTo'])
+        )
+        route_airlines = df_route_airline_delay_rate[route_mask].copy()
+        route_airlines = route_airlines.sort_values('delay_rate', ascending=False)
+        user_airline_row = route_airlines[route_airlines['Airline'] == input_data['Airline']]
+        user_airline_in_top10 = input_data['Airline'] in route_airlines.head(10)['Airline'].values
+        if user_airline_in_top10:
+            top10 = route_airlines.head(10)
+        else:
+            top10 = pd.concat([route_airlines.head(9), user_airline_row]) if not user_airline_row.empty else route_airlines.head(10)
+        
+        histogram_data = [
+            {'airline': row['Airline'], 'delay_rate': row['delay_rate']}
+            for _, row in top10.iterrows()
+        ]
+
+        # top delayed routes from user's selected airline
+        airline_routes = df_route_airline_delay_rate[df_route_airline_delay_rate['Airline'] == input_data['Airline']].copy()
+        top_delayed_routes = airline_routes.sort_values('delay_rate', ascending=False).head(10)
+        route_histogram_data = [
+            {
+                'route': f"{row['AirportFrom']}-{row['AirportTo']}", 
+                'delay_rate': row['delay_rate']
+            }
+            for _, row in top_delayed_routes.iterrows()
+        ]
+
+
         return jsonify({
             'delay_probability': delay_prob,
             'risk_category': risk_category,
@@ -99,7 +139,10 @@ def predict():
             'detailed_prediction': {
                 'no_delay_prob': no_delay_prob,
                 'delay_prob': delay_prob
-            }
+            },
+            'route_airline_delay_rate': route_airline_delay_rate,
+            'histogram_data': histogram_data,
+            'route_histogram_data': route_histogram_data
         })
 
     except Exception as e:
