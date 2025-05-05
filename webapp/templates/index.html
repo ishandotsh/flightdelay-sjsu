@@ -1,109 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Flight Delay Predictor</title>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-        }
-        form {
-            background: #f4f4f4;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        #result {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Flight Delay Predictor</title>
+
+  <!-- jQuery and Select2 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+      background-color: #111;
+      color: #fff;
+    }
+
+    h1 {
+      color: #eaeaea;
+    }
+
+    form {
+      background: #1c1c1c;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    select, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #000;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
+
+    .select2-container--default .select2-selection--single {
+      background-color: #000;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      color: #fff;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      color: #fff;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    button {
+      background-color: #0056ff;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #003bb3;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .flex-row select {
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
-    <h1>Flight Delay Predictor</h1>
-    <form id="predictionForm">
-        <select id="airline" name="airline" required style="width:100%"></select>
-        <select id="airport_from" name="airport_from" required style="width:100%"></select>
-        <select id="airport_to" name="airport_to" required style="width:100%"></select>
+  <h1>Flight Delay Predictor</h1>
+  <form id="predictionForm">
+    <div class="form-group">
+      <label for="airline">Airline</label>
+      <select id="airline" name="airline" required></select>
+    </div>
 
-        <select name="day_of_week" required>
-            <option value="">Select Day of Week</option>
-            <option value="1">Monday</option>
-            <option value="2">Tuesday</option>
-            <option value="3">Wednesday</option>
-            <option value="4">Thursday</option>
-            <option value="5">Friday</option>
-            <option value="6">Saturday</option>
-            <option value="7">Sunday</option>
+    <div class="form-group">
+      <label for="airport_from">Origin Airport</label>
+      <select id="airport_from" name="airport_from" required></select>
+    </div>
+
+    <div class="form-group">
+      <label for="airport_to">Destination Airport</label>
+      <select id="airport_to" name="airport_to" required></select>
+    </div>
+
+    <div class="form-group">
+      <label for="day_of_week">Day of the Week</label>
+      <select name="day_of_week" required>
+        <option value="">Select Day</option>
+        <option value="1">Monday</option>
+        <option value="2">Tuesday</option>
+        <option value="3">Wednesday</option>
+        <option value="4">Thursday</option>
+        <option value="5">Friday</option>
+        <option value="6">Saturday</option>
+        <option value="7">Sunday</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Time of Flight</label>
+      <div class="flex-row">
+        <select id="hour" required>
+          <option value="">Hour</option>
+          <script>for (let i = 1; i <= 12; i++) document.write(`<option value="${i}">${i}</option>`);</script>
         </select>
+        <select id="minute" required>
+          <option value="">Min</option>
+          <script>for (let i = 0; i < 60; i++) {
+            let val = i.toString().padStart(2, '0');
+            document.write(`<option value="${val}">${val}</option>`);
+          }</script>
+        </select>
+        <select id="ampm" required>
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
+      </div>
+      <input type="hidden" name="time" id="time_hidden" required>
+    </div>
 
-        <label>Time of Flight</label>
-        <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
-            <select id="hour" required>
-                <option value="">Hour</option>
-                <script>
-                    for (let i = 1; i <= 12; i++) {
-                        document.write(`<option value="${i}">${i}</option>`);
-                    }
-                </script>
-            </select>
-            <span>:</span>
-            <select id="minute" required>
-                <option value="">Min</option>
-                <script>
-                    for (let i = 0; i < 60; i++) {
-                        let val = i.toString().padStart(2, '0');
-                        document.write(`<option value="${val}">${val}</option>`);
-                    }
-                </script>
-            </select>
-            <select id="ampm" required>
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-            </select>
-        </div>
-        <input type="hidden" name="time" id="time_hidden" required>
+    <div class="form-group">
+      <label>Flight Duration</label>
+      <div class="flex-row">
+        <select id="length_hour" required>
+          <option value="">Hours</option>
+          <script>for (let i = 0; i <= 23; i++) document.write(`<option value="${i}">${i}</option>`);</script>
+        </select>
+        <select id="length_minute" required>
+          <option value="">Minutes</option>
+          <script>for (let i = 0; i < 60; i++) {
+            let val = i.toString().padStart(2, '0');
+            document.write(`<option value="${val}">${val}</option>`);
+          }</script>
+        </select>
+      </div>
+      <input type="hidden" name="length" id="length_hidden" required>
+    </div>
 
-        <label>Flight Length</label>
-        <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
-            <select id="length_hour" required>
-                <option value="">Hours</option>
-                <script>
-                    for (let i = 0; i <= 23; i++) {
-                        document.write(`<option value="${i}">${i}</option>`);
-                    }
-                </script>
-            </select>
-            <span>:</span>
-            <select id="length_minute" required>
-                <option value="">Min</option>
-                <script>
-                    for (let i = 0; i < 60; i++) {
-                        let val = i.toString().padStart(2, '0');
-                        document.write(`<option value="${val}">${val}</option>`);
-                    }
-                </script>
-            </select>
-        </div>
-        <input type="hidden" name="length" id="length_hidden" required>
+    <button type="submit">Predict Delay</button>
+  </form>
 
-        <button type="submit">Predict Delay</button>
-    </form>
+  <div id="result"></div>
 
-    <div id="result"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        const airlineMap = {
+  <script>
+    const airlineMap = {
             'AS': 'Alaska Airlines', 'AA': 'American Airlines', 'AC': 'Air Canada', 'AM': 'Aeromexico',
             'CO': 'Continental Airlines', 'DL': 'Delta Airlines', 'FX': 'FedEx', 'HA': 'Hawaiian Airlines',
             'NW': 'Northwest Airlines', 'PO': 'Polar Air Cargo', 'SW': 'Southwest Airlines',
@@ -125,71 +195,63 @@
             'SLC': 'Salt Lake City Intl', 'SMF': 'Sacramento Intl', 'STL': 'St. Louis Lambert', 'TPA': 'Tampa Intl'
         };
 
-        function populateSelect(id, mapData, placeholder) {
-            const select = document.getElementById(id);
-            select.innerHTML = `<option value="">${placeholder}</option>`;
-            Object.entries(mapData).forEach(([code, name]) => {
-                select.innerHTML += `<option value="${code}">${name} (${code})</option>`;
-            });
-        }
 
-        populateSelect('airline', airlineMap, 'Select Airline');
-        populateSelect('airport_from', airportMap, 'Select Origin Airport');
-        populateSelect('airport_to', airportMap, 'Select Destination Airport');
+    function populateSelect(id, mapData, placeholder) {
+      const select = document.getElementById(id);
+      select.innerHTML = `<option value="">${placeholder}</option>`;
+      Object.entries(mapData).forEach(([code, name]) => {
+        select.innerHTML += `<option value="${code}">${name} (${code})</option>`;
+      });
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            $('#airline').select2({ placeholder: 'Select Airline', allowClear: true });
-            $('#airport_from').select2({ placeholder: 'Select Origin Airport', allowClear: true });
-            $('#airport_to').select2({ placeholder: 'Select Destination Airport', allowClear: true });
+    populateSelect('airline', airlineMap, 'Select Airline');
+    populateSelect('airport_from', airportMap, 'Select Origin Airport');
+    populateSelect('airport_to', airportMap, 'Select Destination Airport');
 
-            document.getElementById('predictionForm').addEventListener('submit', function(e) {
-                e.preventDefault();
+    $(document).ready(function () {
+      $('#airline').select2();
+      $('#airport_from').select2();
+      $('#airport_to').select2();
 
-                const hour = parseInt(document.getElementById('hour').value, 10);
-                const minute = parseInt(document.getElementById('minute').value, 10);
-                const ampm = document.getElementById('ampm').value;
-                if (isNaN(hour) || isNaN(minute) || !ampm) {
-                    alert('Please select a valid time.');
-                    return;
-                }
-                let hour24 = hour % 12;
-                if (ampm === 'PM') hour24 += 12;
-                const minutesFromMidnight = hour24 * 60 + minute;
-                document.getElementById('time_hidden').value = minutesFromMidnight;
+      $('#predictionForm').on('submit', function (e) {
+        e.preventDefault();
 
-                const lengthHour = parseInt(document.getElementById('length_hour').value, 10);
-                const lengthMinute = parseInt(document.getElementById('length_minute').value, 10);
-                if (isNaN(lengthHour) || isNaN(lengthMinute)) {
-                    alert('Please select a valid flight length.');
-                    return;
-                }
-                const totalLength = lengthHour * 60 + lengthMinute;
-                document.getElementById('length_hidden').value = totalLength;
+        const hour = parseInt($('#hour').val());
+        const minute = parseInt($('#minute').val());
+        const ampm = $('#ampm').val();
+        if (isNaN(hour) || isNaN(minute) || !ampm) return alert("Invalid time");
+        let hour24 = hour % 12;
+        if (ampm === "PM") hour24 += 12;
+        $('#time_hidden').val(hour24 * 60 + minute);
 
-                fetch('/predict', {
-                    method: 'POST',
-                    body: new FormData(e.target)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    const resultDiv = document.getElementById('result');
-                    if (data.error) {
-                        resultDiv.innerHTML = `Error: ${data.error}`;
-                        resultDiv.style.color = 'red';
-                    } else {
-                        resultDiv.innerHTML = `
-                            <p><strong>Delay Probability:</strong> ${data.delay_probability}%</p>
-                            <p><strong>Likely to be Delayed:</strong> ${data.is_delayed}</p>
-                            <p><strong>Risk Category:</strong> ${data.risk_category}</p>`;
-                        resultDiv.style.color = data.is_delayed === 'Yes' ? 'red' : 'green';
-                    }
-                })
-                .catch(err => {
-                    console.error('Error:', err);
-                    document.getElementById('result').innerHTML = 'Prediction failed.';
-                });
-            });
+        const lengthHour = parseInt($('#length_hour').val());
+        const lengthMinute = parseInt($('#length_minute').val());
+        if (isNaN(lengthHour) || isNaN(lengthMinute)) return alert("Invalid flight length");
+        $('#length_hidden').val(lengthHour * 60 + lengthMinute);
+
+        fetch('/predict', {
+          method: 'POST',
+          body: new FormData(this)
+        })
+        .then(res => res.json())
+        .then(data => {
+          const resultDiv = $('#result');
+          if (data.error) {
+            resultDiv.html(`Error: ${data.error}`).css("color", "red");
+          } else {
+            resultDiv.html(`
+              <p><strong>Delay Probability:</strong> ${data.delay_probability}%</p>
+              <p><strong>Likely to be Delayed:</strong> ${data.is_delayed}</p>
+              <p><strong>Risk Category:</strong> ${data.risk_category}</p>
+            `).css("color", data.is_delayed === 'Yes' ? 'red' : 'green');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          $('#result').html("Prediction failed.").css("color", "red");
         });
-    </script>
+      });
+    });
+  </script>
 </body>
 </html>
