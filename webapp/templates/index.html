@@ -159,70 +159,52 @@
             'ADK', 'ABR', 'TEX', 'MMH', 'GUM'
         ].sort();
 
+        function populateSelect(id, options, placeholder) {
+            const select = document.getElementById(id);
+            select.innerHTML = `<option value="">${placeholder}</option>` +
+                options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+        }
 
-    function populateSelect(id, mapData, placeholder) {
-      const select = document.getElementById(id);
-      select.innerHTML = `<option value="">${placeholder}</option>`;
-      Object.entries(mapData).forEach(([code, name]) => {
-        select.innerHTML += `<option value="${code}">${name} (${code})</option>`;
-      });
-    }
+        populateSelect('airline', airlines, 'Select Airline');
+        populateSelect('airport_from', airports, 'Select Origin Airport');
+        populateSelect('airport_to', airports, 'Select Destination Airport');
 
-    populateSelect('airline', airlineMap, 'Select Airline');
-    populateSelect('airport_from', airportMap, 'Select Origin Airport');
-    populateSelect('airport_to', airportMap, 'Select Destination Airport');
+        $(document).ready(function() {
+            $('#airline').select2({ placeholder: 'Select Airline', allowClear: true });
+            $('#airport_from').select2({ placeholder: 'Select Origin Airport', allowClear: true });
+            $('#airport_to').select2({ placeholder: 'Select Destination Airport', allowClear: true });
+        });
+    </script>
 
-    function populateSelect(id, mapData, placeholder) {
-      const select = document.getElementById(id);
-      select.innerHTML = `<option value="">${placeholder}</option>`;
-      Object.entries(mapData).forEach(([code, name]) => {
-        select.innerHTML += `<option value="${code}">${name} (${code})</option>`;
-      });
-    }
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    populateSelect('airline', airlineMap, 'Select Airline');
-    populateSelect('airport_from', airportMap, 'Select Origin Airport');
-    populateSelect('airport_to', airportMap, 'Select Destination Airport');
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const hour = parseInt(document.getElementById('hour').value, 10);
+            const minute = parseInt(document.getElementById('minute').value, 10);
+            const ampm = document.getElementById('ampm').value;
+            if (isNaN(hour) || isNaN(minute) || !ampm) {
+                e.preventDefault();
+                alert('Please select a valid time.');
+                return;
+            }
 
-    $(document).ready(function () {
-      $('#airline').select2();
-      $('#airport_from').select2();
-      $('#airport_to').select2();
+            let hour24 = hour % 12;
+            if (ampm === 'PM') hour24 += 12;
+            const minutesFromMidnight = hour24 * 60 + minute;
 
-      $('#predictionForm').on('submit', function (e) {
-        e.preventDefault();
+            document.getElementById('time_hidden').value = minutesFromMidnight;
 
-        const hour = parseInt($('#hour').val());
-        const minute = parseInt($('#minute').val());
-        const ampm = $('#ampm').val();
-        if (isNaN(hour) || isNaN(minute) || !ampm) return alert("Invalid time");
-        let hour24 = hour % 12;
-        if (ampm === "PM") hour24 += 12;
-        $('#time_hidden').val(hour24 * 60 + minute);
-    $(document).ready(function () {
-      $('#airline').select2();
-      $('#airport_from').select2();
-      $('#airport_to').select2();
-
-      $('#predictionForm').on('submit', function (e) {
-        e.preventDefault();
-
-        const hour = parseInt($('#hour').val());
-        const minute = parseInt($('#minute').val());
-        const ampm = $('#ampm').val();
-        if (isNaN(hour) || isNaN(minute) || !ampm) return alert("Invalid time");
-        let hour24 = hour % 12;
-        if (ampm === "PM") hour24 += 12;
-        $('#time_hidden').val(hour24 * 60 + minute);
-
-        const lengthHour = parseInt($('#length_hour').val());
-        const lengthMinute = parseInt($('#length_minute').val());
-        if (isNaN(lengthHour) || isNaN(lengthMinute)) return alert("Invalid flight length");
-        $('#length_hidden').val(lengthHour * 60 + lengthMinute);
-        const lengthHour = parseInt($('#length_hour').val());
-        const lengthMinute = parseInt($('#length_minute').val());
-        if (isNaN(lengthHour) || isNaN(lengthMinute)) return alert("Invalid flight length");
-        $('#length_hidden').val(lengthHour * 60 + lengthMinute);
+            const lengthHour = parseInt(document.getElementById('length_hour').value, 10);
+            const lengthMinute = parseInt(document.getElementById('length_minute').value, 10);
+            if (isNaN(lengthHour) || isNaN(lengthMinute)) {
+                alert('Please select a valid flight length.');
+                return;
+            }
+            const totalLengthMinutes = lengthHour * 60 + lengthMinute;
+            document.getElementById('length_hidden').value = totalLengthMinutes;
 
             fetch('/predict', {
                 method: 'POST',
